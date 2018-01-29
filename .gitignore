@@ -4,3 +4,4 @@ terraform.tfvars
 crash.log
 *.~vsdx
 tfstate
+terraform.env
