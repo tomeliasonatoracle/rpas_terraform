@@ -1,0 +1,38 @@
+#!/bin/bash
+set -e
+
+APPSTORAGE=/u01
+
+## Install and configure a RPAS server to export a remote attached LUN.
+
+### Send stdout, stderr to /var/log/messages/
+exec 1> >(logger -s -t $(basename $0)) 2>&1
+
+### Storage setup, assume dev arrives as sdb
+wget -O /usr/local/bin/iscsiattach.sh https://raw.githubusercontent.com/oracle/terraform-provider-oci/master/docs/examples/storage/nfs/userdata/iscsiattach.sh
+chmod +x /usr/local/bin/iscsiattach.sh
+/usr/local/bin/iscsiattach.sh
+mkfs.xfs /dev/sdb
+mkdir $APPSTORAGE
+mount -t xfs /dev/sdb $APPSTORAGE
+sdb_uuid=`blkid /dev/sdb -s UUID -o value`
+echo "UUID=$sdb_uuid    $APPSTORAGE    xfs    defaults,noatime,_netdev,nofail" >> /etc/fstab
+
+### setup
+firewall-offline-cmd --zone=public --add-port=49152-65535/tcp --add-port=55000-55005/tcp --add-port=56000-56005/tcp
+
+##TODO add RPAS ports
+#firewall-offline-cmd --zone=public --add-service=nfs
+
+#yum -y install nfs-utils
+
+##TODO create user and domain ownership
+#useradd ...
+#chown nfsnobody:nfsnobody /u00
+#chmod 777 /u00
+
+### YUM update
+yum update -y
+
+### Firewall
+systemctl restart firewalld.service

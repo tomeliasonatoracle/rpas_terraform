@@ -1,0 +1,36 @@
+#!/bin/bash
+set -e
+
+APPSTORAGE=/scratch
+
+## Install and configure a WLS server to export a remote attached LUN.
+
+### Send stdout, stderr to /var/log/messages/
+exec 1> >(logger -s -t $(basename $0)) 2>&1
+
+### Storage setup, assume dev arrives as sdb
+wget -O /usr/local/bin/iscsiattach.sh https://raw.githubusercontent.com/oracle/terraform-provider-oci/master/docs/examples/storage/nfs/userdata/iscsiattach.sh
+chmod +x /usr/local/bin/iscsiattach.sh
+/usr/local/bin/iscsiattach.sh
+
+mkfs.xfs /dev/sdb
+mkdir $APPSTORAGE
+mount -t xfs /dev/sdb $APPSTORAGE
+sdb_uuid=`blkid /dev/sdb -s UUID -o value`
+echo "UUID=$sdb_uuid    $APPSTORAGE    xfs    defaults,noatime,_netdev,nofail" >> /etc/fstab
+
+### Firewall
+#firewall-offline-cmd --zone=public --add-port=389/tcp --add-port=14000/tcp --add-port=14010/tcp --add-port=5575/tcp --add-port=7005/tcp
+iptables -A INPUT -p tcp --dport 389 -j ACCEPT
+iptables -A INPUT -p tcp --dport 14000 -j ACCEPT
+iptables -A INPUT -p tcp --dport 14010 -j ACCEPT
+iptables -A INPUT -p tcp --dport 5575 -j ACCEPT
+iptables -A INPUT -p tcp --dport 7005 -j ACCEPT
+
+## YUM update
+yum -y update 
+yum -y install sudo tar ksh zip unzip expect redhat-lsb-core which perl compat-libcap1 compat-libstdc++-33 glibc-devel libaio ncompress sysstat gcc gcc-c++ libstdc++-devel iputils wget compat-libstdc++-33.i686 libgcc.i686 libstdc++.i686 glibc.i686 libaio-devel.x86_64 libaio-devel.i686 glibc-devel.i686
+
+## Restart services
+#systemctl restart firewalld.service
+service iptables restart

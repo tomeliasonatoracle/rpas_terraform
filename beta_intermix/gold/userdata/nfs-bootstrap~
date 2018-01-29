@@ -1,0 +1,42 @@
+#!/bin/bash
+set -e
+
+## Install and configure a NFS server to export a remote attached LUN.
+
+NFSSTORAGE=/scratch
+
+### Send stdout, stderr to /var/log/messages/
+exec 1> >(logger -s -t $(basename $0)) 2>&1
+
+### Storage setup, assume dev arrives as sdb
+wget -O /usr/local/bin/iscsiattach.sh https://raw.githubusercontent.com/oracle/terraform-provider-oci/master/docs/examples/storage/nfs/userdata/iscsiattach.sh
+chmod +x /usr/local/bin/iscsiattach.sh
+/usr/local/bin/iscsiattach.sh
+mkfs.xfs /dev/sdb
+mkdir $NFSSTORAGE
+mount -t xfs /dev/sdb $NFSSTORAGE
+sdb_uuid=`blkid /dev/sdb -s UUID -o value`
+echo "UUID=$sdb_uuid    $NFSSTORAGE    xfs    defaults,noatime,_netdev,nofail" >> /etc/fstab
+
+
+### NFS setup
+yum -y install nfs-utils
+
+firewall-offline-cmd --zone=public --add-service=nfs
+firewall-offline-cmd --zone public --add-service mountd
+firewall-offline-cmd --zone public --add-service rpc-bind
+
+systemctl enable nfs-server.service
+systemctl start nfs-server.service
+
+chown nfsnobody:nfsnobody $NFSSTORAGE
+chmod 777 $NFSSTORAGE
+cidr=`ip addr show dev ens3 | grep "inet " | awk -F' ' '{print $2}'`
+echo "$NFSSTORAGE $cidr(rw,sync,no_subtree_check)" > /etc/exports
+exportfs -a
+
+### Firewall
+systemctl restart firewalld.service
+
+### YUM update
+yum update -y

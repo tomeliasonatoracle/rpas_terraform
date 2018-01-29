@@ -1,0 +1,29 @@
+#!/bin/bash
+set -e
+
+APPSTORAGE=/scratch
+
+## Install and configure a WLS server to export a remote attached LUN.
+
+### Send stdout, stderr to /var/log/messages/
+exec 1> >(logger -s -t $(basename $0)) 2>&1
+
+### Storage setup, assume dev arrives as sdb
+wget -O /usr/local/bin/iscsiattach.sh https://raw.githubusercontent.com/oracle/terraform-provider-oci/master/docs/examples/storage/nfs/userdata/iscsiattach.sh
+chmod +x /usr/local/bin/iscsiattach.sh
+/usr/local/bin/iscsiattach.sh
+mkfs.xfs /dev/sdb
+mkdir $APPSTORAGE
+mount -t xfs /dev/sdb $APPSTORAGE
+sdb_uuid=`blkid /dev/sdb -s UUID -o value`
+echo "UUID=$sdb_uuid    $APPSTORAGE    xfs    defaults,noatime,_netdev,nofail" >> /etc/fstab
+
+##TODO add WLS ports
+firewall-offline-cmd --zone=public --add-port=80/tcp --add-port=443/tcp
+
+### YUM update
+yum update -y
+yum install -y oracle-database-server-12cR1-preinstall
+
+### Firewall
+systemctl restart firewalld.service
