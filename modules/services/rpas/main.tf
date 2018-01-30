@@ -8,12 +8,12 @@ resource "oci_core_instance" "TFRPASInstance" {
 
   metadata {
     ssh_authorized_keys = "${var.ssh_public_key}"
-    user_data = "${base64encode(file(var.BootStrapFile))}"
+#    user_data = "${base64encode(file(var.BootStrapFile))}"
   }
 
   create_vnic_details {
     subnet_id = "${var.SubnetOCID}"
-    assign_public_ip = "true"     
+    assign_public_ip = "true"
   }
 
   timeouts {

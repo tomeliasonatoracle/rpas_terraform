@@ -84,8 +84,10 @@ module "db" {
   BlockStorageSize = "50" #GB
   compartment_ocid="${var.compartment_ocid}"
   SubnetOCID="${var.SubnetOCID}"
-  InstanceOS="${var.default_os}"
-  InstanceOSVersion="${var.default_os_version}"
+#  InstanceOS="${var.default_os}"
+#  InstanceOSVersion="${var.default_os_version}"
+  InstanceOS="Oracle Linux"
+  InstanceOSVersion="6.9"
   InstanceShape="VM.Standard1.2"
   tenancy_ocid = "${var.tenancy_ocid}"
   ssh_public_key = "${var.ssh_public_key}"
