@@ -8,14 +8,16 @@ provider "oci" {
 
 module "nfs" {
   source = "../../modules/services/nfs"
-  
+
   NamePrefix = "${var.name_prefix}"
   AD = "${var.default_ad}"
-  BlockStorageSize = "2048" #GB 
+  BlockStorageSize = "2048" #GB
   compartment_ocid="${var.compartment_ocid}"
   SubnetOCID="${var.SubnetOCID}"
-  InstanceOS="${var.default_os}"
-  InstanceOSVersion="${var.default_os_version}"
+#  InstanceOS="${var.default_os}"
+#  InstanceOSVersion="${var.default_os_version}"
+  InstanceOS="Oracle Linux"
+  InstanceOSVersion="6.9"
   InstanceShape="VM.Standard1.1"
   tenancy_ocid = "${var.tenancy_ocid}"
   ssh_public_key = "${var.ssh_public_key}"
@@ -23,14 +25,16 @@ module "nfs" {
 
 module "rpas" {
   source = "../../modules/services/rpas"
-  
+
   NamePrefix = "${var.name_prefix}"
   AD = "${var.default_ad}"
-  BlockStorageSize = "250" #GB 
+  BlockStorageSize = "250" #GB
   compartment_ocid="${var.compartment_ocid}"
   SubnetOCID="${var.SubnetOCID}"
-  InstanceOS="${var.default_os}"
-  InstanceOSVersion="${var.default_os_version}"
+#  InstanceOS="${var.default_os}"
+#  InstanceOSVersion="${var.default_os_version}"
+  InstanceOS="Oracle Linux"
+  InstanceOSVersion="6.9"
   InstanceShape="VM.Standard1.2"
   tenancy_ocid = "${var.tenancy_ocid}"
   ssh_public_key = "${var.ssh_public_key}"
@@ -40,14 +44,16 @@ module "rpas" {
 
 module "wls" {
   source = "../../modules/services/wls"
-  
+
   NamePrefix = "${var.name_prefix}"
   AD = "${var.default_ad}"
-  BlockStorageSize = "50" #GB 
+  BlockStorageSize = "50" #GB
   compartment_ocid="${var.compartment_ocid}"
   SubnetOCID="${var.SubnetOCID}"
-  InstanceOS="${var.default_os}"
-  InstanceOSVersion="${var.default_os_version}"
+#  InstanceOSVersion="${var.default_os_version}"
+#  InstanceShape="VM.Standard1.2"
+  InstanceOS="Oracle Linux"
+  InstanceOSVersion="6.9"
   InstanceShape="VM.Standard1.2"
   tenancy_ocid = "${var.tenancy_ocid}"
   ssh_public_key = "${var.ssh_public_key}"
@@ -55,10 +61,10 @@ module "wls" {
 
 module "idm" {
   source = "../../modules/services/idm"
-  
+
   NamePrefix = "${var.name_prefix}"
   AD = "${var.default_ad}"
-  BlockStorageSize = "50" #GB 
+  BlockStorageSize = "50" #GB
   compartment_ocid="${var.compartment_ocid}"
   SubnetOCID="${var.SubnetOCID}"
 #  InstanceOS="${var.default_os}"
@@ -72,10 +78,10 @@ module "idm" {
 
 module "db" {
   source = "../../modules/services/db"
-  
+
   NamePrefix = "${var.name_prefix}"
   AD = "${var.default_ad}"
-  BlockStorageSize = "50" #GB 
+  BlockStorageSize = "50" #GB
   compartment_ocid="${var.compartment_ocid}"
   SubnetOCID="${var.SubnetOCID}"
   InstanceOS="${var.default_os}"
