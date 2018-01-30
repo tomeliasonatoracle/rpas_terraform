@@ -6,14 +6,14 @@ resource "oci_core_instance" "TFRPASInstance" {
 
   metadata {
     ssh_authorized_keys = "${var.ssh_public_key}"
-    user_data = "${base64encode(file(var.BootStrapFile))}"
+#    user_data = "${base64encode(file(var.BootStrapFile))}"
   }
 
   create_vnic_details {
     subnet_id = "${var.SubnetOCID}"
     display_name = "${var.NamePrefix} RPAS server"
    hostname_label = "${lower(var.NamePrefix)}-rpas"
-    assign_public_ip = "false"     
+    assign_public_ip = "false"
   }
 
   timeouts {
